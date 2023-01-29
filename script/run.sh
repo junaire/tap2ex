@@ -10,6 +10,8 @@ COLOR_ERROR="\e[38;5;198m"
 COLOR_NONE="\e[0m"
 COLOR_SUCC="\e[92m"
 
+echoerr() { echo -e "$@" 1>&2; }
+
 update_core(){
     echo -e "${COLOR_ERROR}当前系统内核版本太低 <$VERSION_CURR>,需要更新系统内核.${COLOR_NONE}"
     sudo apt install -y -qq --install-recommends linux-generic-hwe-18.04
@@ -24,18 +26,18 @@ check_bbr(){
 
     # 如果已经发现 bbr 进程
     if [ -n "$has_bbr" ] ;then
-        echo -e "${COLOR_SUCC}TCP BBR 拥塞控制算法已经启动${COLOR_NONE}"
+        echoerr "${COLOR_SUCC}TCP BBR 拥塞控制算法已经启动${COLOR_NONE}"
     else
         start_bbr
     fi
 }
 
 start_bbr(){
-    echo "启动 TCP BBR 拥塞控制算法"
+    echoerr "启动 TCP BBR 拥塞控制算法"
     sudo modprobe tcp_bbr
-    echo "tcp_bbr" | sudo tee --append /etc/modules-load.d/modules.conf
-    echo "net.core.default_qdisc=fq" | sudo tee --append /etc/sysctl.conf
-    echo "net.ipv4.tcp_congestion_control=bbr" | sudo tee --append /etc/sysctl.conf
+    sudo echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
+    sudo echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
+    sudo echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
     sudo sysctl -p
     sysctl net.ipv4.tcp_available_congestion_control
     sysctl net.ipv4.tcp_congestion_control
@@ -52,7 +54,7 @@ install_bbr() {
 
 install_docker() {
     if ! [ -x "$(command -v docker)" ]; then
-        echo "开始安装 Docker CE"
+        echoerr "开始安装 Docker CE"
         curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
         sudo add-apt-repository \
             "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
@@ -61,7 +63,7 @@ install_docker() {
         sudo apt-get update -qq
         sudo apt-get install -y docker-ce
     else
-        echo -e "${COLOR_SUCC}Docker CE 已经安装成功了${COLOR_NONE}"
+        echoerr "${COLOR_SUCC}Docker CE 已经安装成功了${COLOR_NONE}"
     fi
 }
 
@@ -161,13 +163,14 @@ create_cron_job(){
 }
 
 install_shadowsocks(){
+    echoerr "${COLOR_ERROR}开始安装ShadowSocks 容器。${COLOR_NONE}"
     if ! [ -x "$(command -v docker)" ]; then
-        echo -e "${COLOR_ERROR}未发现Docker，请求安装 Docker ! ${COLOR_NONE}"
+        echoerr "${COLOR_ERROR}未发现Docker，请求安装 Docker ! ${COLOR_NONE}"
         return
     fi
 
     if check_container ss ; then
-        echo -e "${COLOR_ERROR}ShadowSocks 容器已经在运行了，你可以手动停止容器，并删除容器，然后再执行本命令来重新安装 ShadowSocks。${COLOR_NONE}"
+        echoerr "${COLOR_ERROR}ShadowSocks 容器已经在运行了，你可以手动停止容器，并删除容器，然后再执行本命令来重新安装 ShadowSocks。${COLOR_NONE}"
         return
     fi
 
@@ -176,9 +179,12 @@ install_shadowsocks(){
     PORT=1984
     PASS=19890604
 
+
     sudo docker run -dt --name ss \
         -p "${PORT}:${PORT}" mritd/shadowsocks \
         -s "-s ${BIND_IP} -p ${PORT} -m aes-256-cfb -k ${PASS} --fast-open"
+
+    echo "安装成功: Port: ${PORT}, Password: ${PASS}"
 }
 
 install_vpn(){

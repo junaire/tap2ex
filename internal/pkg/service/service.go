@@ -35,7 +35,7 @@ func Submit(c *gin.Context) {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
-	command := "bash <(curl -s -L https://raw.githubusercontent.com/junaire/tap2ex/main/script/run.sh)"
+	command := "curl -s -o /tmp/install.sh https://raw.githubusercontent.com/junaire/tap2ex/main/script/run.sh && bash /tmp/install.sh 2> /tmp/install.log &"
 	str, err := shellConnector.ExecuteCommand(req.IP, int(port), req.Username, req.Password, command)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
