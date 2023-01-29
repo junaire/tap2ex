@@ -61,7 +61,7 @@ install_docker() {
             $(lsb_release -cs) \
             stable"
         sudo apt-get update -qq
-        sudo apt-get install -y docker-ce
+        sudo apt-get -qq install -y docker-ce
     else
         echoerr "${COLOR_SUCC}Docker CE 已经安装成功了${COLOR_NONE}"
     fi
