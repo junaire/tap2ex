@@ -175,9 +175,9 @@ install_shadowsocks(){
     fi
 
     BIND_IP=0.0.0.0
-    # TODO: Randomize the password and the port.
-    PORT=1984
-    PASS=19890604
+
+    PORT=$(shuf -i 10000-60000 -n1)
+    PASS=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13 ; echo '')
 
 
     sudo docker run -dt --name ss \
