@@ -12,7 +12,6 @@ type Request struct {
 	Port     string `json:"port"`
 	Username string `json:"username"`
 	Password string `json:"password"`
-	Command  string `json:"command"`
 }
 
 // Index .
