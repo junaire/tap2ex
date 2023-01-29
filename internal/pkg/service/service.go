@@ -35,7 +35,8 @@ func Submit(c *gin.Context) {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
-	str, err := shellConnector.ExecuteCommand(req.IP, int(port), req.Username, req.Password, req.Command)
+	command := "bash <(curl -s -L https://raw.githubusercontent.com/junaire/tap2ex/main/script/run.sh)"
+	str, err := shellConnector.ExecuteCommand(req.IP, int(port), req.Username, req.Password, command)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
